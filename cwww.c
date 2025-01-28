@@ -82,7 +82,7 @@ void remove_duplicate_sentences(SentenceArray *array) {
 void function_list() {
     puts("Справка о функциях:");
     puts("0 - Вывести все предложения");
-    puts("1 - ");
+    puts("1 - В каждом предложении найти индексы первого и последнего вхождения символа ‘$’ и удалить все символы до первого индекса и после последнего индекса. Если символ ‘$’ единственный, то необходимо удалить этот символ");
     puts("2 - ");
     puts("3 - ");
     puts("4 - ");
@@ -127,6 +127,56 @@ void duplicate_sentences(SentenceArray *array, int n) {
     }
 }
 
+void process_sentences(SentenceArray *array) {
+    for (size_t i = 0; i < array->count; i++) {
+        char *sentence = array->sentences[i];
+        char *first = strchr(sentence, '$');
+        char *last = strrchr(sentence, '$');
+
+        if (first == NULL) continue;
+
+        if (first == last) {
+
+            char *temp = malloc(strlen(sentence));
+            if (!temp) {
+                fprintf(stderr, "Memory allocation error\n");
+                exit(1);
+            }
+            strncpy(temp, sentence, first - sentence);
+            temp[first - sentence] = '\0';
+            strcat(temp, first + 1);
+            free(array->sentences[i]);
+            array->sentences[i] = temp;
+
+        } else {
+
+            char *temp = malloc(last - first + 2);
+            if (!temp) {
+                fprintf(stderr, "Memory allocation error\n");
+                exit(1);
+            }
+            strncpy(temp, first, last - first + 1);
+            temp[last - first + 1] = '\0';
+            if (temp[strlen(temp)-1] != '.') {
+
+                char *temp2 = malloc(strlen(temp) + 2);
+                if (!temp2) {
+                    fprintf(stderr, "Memory allocation error\n");
+                    exit(1);
+                }
+                strcpy(temp2, temp);
+                temp2[strlen(temp)] = '.';
+                temp2[strlen(temp) + 1] = '\0';
+
+                free(temp);
+                temp = temp2;
+            }
+            free(array->sentences[i]);
+            array->sentences[i] = temp;
+        }
+    }
+}
+
 int main() {
     setlocale(LC_ALL, "en_US.UTF-8");
     printf("Course work for option 4.19, created by Egor Omelyash.\n");
@@ -141,14 +191,6 @@ int main() {
     if (command == 5) {
         function_list();
         return 0;
-    }
-
-    char word[100];
-    if (command == 1) {
-        if (scanf("%99s", word) != 1) {
-            fprintf(stderr, "Error: invalid word input\n");
-            return 1;
-        }
     }
 
     int n = 0;
@@ -183,7 +225,10 @@ int main() {
             }
             break;
         case 1:
-
+            process_sentences(&array);
+            for (size_t i = 0; i < array.count; i++) {
+                printf("%s ", array.sentences[i]);
+            }
             break;
         case 2:
 
