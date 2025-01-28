@@ -90,7 +90,7 @@ void function_list() {
     puts("1 - В каждом предложении найти индексы первого и последнего вхождения символа ‘$’ и удалить все символы до первого индекса и после последнего индекса. Если символ ‘$’ единственный, то необходимо удалить этот символ");
     puts("2 - Отсортировать все предложения по уменьшению количества слов в предложении");
     puts("3 - Для всего текста вывести все символы которые в нем есть и их количество. Выводить необходимо в порядке их первого вхождения. Учитывать разделители не нужно.");
-    puts("4 - ");
+    puts("4 - Удалить все предложения с четным индексом");
     puts("5 - Вывести справку");
     puts("8 - Дублировать каждое предложение N раз");
 }
@@ -242,6 +242,30 @@ void count_and_print_chars(const SentenceArray *array) {
     }
 }
 
+// Функция для удаления предложений с четными индексами
+void remove_even_index_sentences(SentenceArray *array) {
+    SentenceArray new_array = {NULL, 0};
+    for (size_t i = 0; i < array->count; i++) {
+        if (i % 2 == 0) {
+            new_array.sentences = realloc(new_array.sentences, sizeof(char*) * (new_array.count + 1));
+            if (new_array.sentences == NULL) {
+                fprintf(stderr, "Memory allocation error\n");
+                exit(1);
+            }
+            new_array.sentences[new_array.count] = strdup(array->sentences[i]);
+            if (new_array.sentences[new_array.count] == NULL) {
+                fprintf(stderr, "Memory allocation error\n");
+                exit(1);
+            }
+            new_array.count++;
+        }
+    }
+
+    free_sentence_array(array);
+    array->sentences = new_array.sentences;
+    array->count = new_array.count;
+}
+
 int main() {
     setlocale(LC_ALL, "en_US.UTF-8");
     printf("Course work for option 4.19, created by Egor Omelyash.\n");
@@ -291,7 +315,7 @@ int main() {
         case 1:
             process_sentences(&array);
             for (size_t i = 0; i < array.count; i++) {
-                printf("%s ", array.sentences[i]);
+                printf("%s\n", array.sentences[i]);
             }
             break;
         case 2:
@@ -304,16 +328,16 @@ int main() {
             count_and_print_chars(&array);
             break;
         case 4:
-
+            remove_even_index_sentences(&array);
+            for (size_t i = 0; i < array.count; i++) {
+                printf("%s\n", array.sentences[i]);
+            }
             break;
         case 8:
             duplicate_sentences(&array, n);
             for (size_t i = 0; i < array.count; i++) {
                 printf("%s\n", array.sentences[i]);
             }
-            break;
-        case 9:
-
             break;
         default:
             fprintf(stderr, "Error: unknown command\n");
