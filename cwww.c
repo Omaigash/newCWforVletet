@@ -81,12 +81,50 @@ void remove_duplicate_sentences(SentenceArray *array) {
 
 void function_list() {
     puts("Справка о функциях:");
-    puts("0 - ");
+    puts("0 - Вывести все предложения");
     puts("1 - ");
     puts("2 - ");
     puts("3 - ");
     puts("4 - ");
-    puts("5 - ");
+    puts("5 - Вывести справку");
+    puts("8 - Дублировать каждое предложение N раз");
+}
+
+void duplicate_sentences(SentenceArray *array, int n) {
+    for (size_t i = 0; i < array->count; i++) {
+        char *original_sentence = array->sentences[i];
+        size_t len = strlen(original_sentence);
+
+        //Удалим точку в конце предложения
+        if (original_sentence[len - 1] == '.') {
+            original_sentence[len - 1] = '\0';
+            len--;
+        }
+
+        // Создадим новую строку для дублированного предложения
+        char *duplicated_sentence = malloc(len * n + n + 1); // +n для пробелов и +1 для \0
+
+        if (!duplicated_sentence) {
+            fprintf(stderr, "Memory allocation error\n");
+            exit(1);
+        }
+
+        char *p = duplicated_sentence;
+        for (int j = 0; j < n; j++) {
+            strcpy(p, original_sentence);
+            p += len;
+            if (j < n - 1) {
+                *p = ' ';
+                p++;
+            }
+        }
+        *p = '.';
+        p++;
+        *p = '\0';
+
+        free(array->sentences[i]);
+        array->sentences[i] = duplicated_sentence;
+    }
 }
 
 int main() {
@@ -109,6 +147,16 @@ int main() {
     if (command == 1) {
         if (scanf("%99s", word) != 1) {
             fprintf(stderr, "Error: invalid word input\n");
+            return 1;
+        }
+    }
+
+    int n = 0;
+    if (command == 8) {
+
+        char temp;
+        if (scanf("%d%c", &n, &temp) != 2 || temp != '\n') {
+            fprintf(stderr, "Error: invalid N input\n");
             return 1;
         }
     }
@@ -145,6 +193,12 @@ int main() {
             break;
         case 4:
 
+            break;
+        case 8:
+            duplicate_sentences(&array, n);
+            for (size_t i = 0; i < array.count; i++) {
+                printf("%s\n", array.sentences[i]);
+            }
             break;
         case 9:
 
