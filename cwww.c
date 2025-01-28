@@ -9,6 +9,7 @@ typedef struct {
     size_t count;
 } SentenceArray;
 
+// Функция для чтения текста из стандартного ввода
 char *read_text() {
     size_t size = 2048, length = 0;
     char *text = malloc(size);
@@ -34,6 +35,7 @@ char *read_text() {
     return text;
 }
 
+// Функция для разбиения текста на предложения
 SentenceArray parse_text(char *text) {
     SentenceArray array = {NULL, 0};
     char *sentence = strtok(text, ".");
@@ -56,6 +58,7 @@ SentenceArray parse_text(char *text) {
     return array;
 }
 
+// Функция для освобождения памяти, выделенной под массив предложений
 void free_sentence_array(SentenceArray *array) {
     for (size_t i = 0; i < array->count; i++) {
         free(array->sentences[i]);
@@ -63,6 +66,7 @@ void free_sentence_array(SentenceArray *array) {
     free(array->sentences);
 }
 
+// Функция для удаления дубликатов предложений
 void remove_duplicate_sentences(SentenceArray *array) {
     for (size_t i = 0; i < array->count; i++) {
         for (size_t j = i + 1; j < array->count; ) {
@@ -79,17 +83,19 @@ void remove_duplicate_sentences(SentenceArray *array) {
     }
 }
 
+// Функция для вывода справки по функциям
 void function_list() {
     puts("Справка о функциях:");
     puts("0 - Вывести все предложения");
     puts("1 - В каждом предложении найти индексы первого и последнего вхождения символа ‘$’ и удалить все символы до первого индекса и после последнего индекса. Если символ ‘$’ единственный, то необходимо удалить этот символ");
-    puts("2 - ");
+    puts("2 - Отсортировать все предложения по уменьшению количества слов в предложении");
     puts("3 - ");
     puts("4 - ");
     puts("5 - Вывести справку");
     puts("8 - Дублировать каждое предложение N раз");
 }
 
+// Функция для дублирования предложений N раз
 void duplicate_sentences(SentenceArray *array, int n) {
     for (size_t i = 0; i < array->count; i++) {
         char *original_sentence = array->sentences[i];
@@ -127,6 +133,7 @@ void duplicate_sentences(SentenceArray *array, int n) {
     }
 }
 
+// Функция для обработки предложений (удаление символов до первого и после последнего вхождения '$')
 void process_sentences(SentenceArray *array) {
     for (size_t i = 0; i < array->count; i++) {
         char *sentence = array->sentences[i];
@@ -175,6 +182,31 @@ void process_sentences(SentenceArray *array) {
             array->sentences[i] = temp;
         }
     }
+}
+
+// Функция для подсчета количества слов в предложении
+int count_words(const char *sentence) {
+    int count = 0;
+    char *copy = strdup(sentence);
+    char *word = strtok(copy, " ");
+    while (word) {
+        count++;
+        word = strtok(NULL, " ");
+    }
+    free(copy);
+    return count;
+}
+
+// Функция сравнения для qsort (сортировка по убыванию количества слов)
+int compare_sentences(const void *a, const void *b) {
+    const char *sentence_a = *(const char **)a;
+    const char *sentence_b = *(const char **)b;
+    return count_words(sentence_b) - count_words(sentence_a);
+}
+
+// Функция для сортировки предложений по убыванию количества слов
+void sort_sentences_by_word_count(SentenceArray *array) {
+    qsort(array->sentences, array->count, sizeof(char *), compare_sentences);
 }
 
 int main() {
@@ -231,7 +263,10 @@ int main() {
             }
             break;
         case 2:
-
+            sort_sentences_by_word_count(&array);
+            for (size_t i = 0; i < array.count; i++) {
+                printf("%s\n", array.sentences[i]);
+            }
             break;
         case 3:
 
