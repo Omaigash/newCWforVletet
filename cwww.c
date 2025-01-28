@@ -89,7 +89,7 @@ void function_list() {
     puts("0 - Вывести все предложения");
     puts("1 - В каждом предложении найти индексы первого и последнего вхождения символа ‘$’ и удалить все символы до первого индекса и после последнего индекса. Если символ ‘$’ единственный, то необходимо удалить этот символ");
     puts("2 - Отсортировать все предложения по уменьшению количества слов в предложении");
-    puts("3 - ");
+    puts("3 - Для всего текста вывести все символы которые в нем есть и их количество. Выводить необходимо в порядке их первого вхождения. Учитывать разделители не нужно.");
     puts("4 - ");
     puts("5 - Вывести справку");
     puts("8 - Дублировать каждое предложение N раз");
@@ -209,6 +209,39 @@ void sort_sentences_by_word_count(SentenceArray *array) {
     qsort(array->sentences, array->count, sizeof(char *), compare_sentences);
 }
 
+// Функция для подсчета и вывода символов
+void count_and_print_chars(const SentenceArray *array) {
+    char chars[256] = {0}; // Массив для хранения информации о символах (был ли встречен)
+    int counts[256] = {0}; // Массив для подсчета количества вхождений
+
+    for (size_t i = 0; i < array->count; i++) {
+        const char *sentence = array->sentences[i];
+        for (size_t j = 0; sentence[j] != '\0'; j++) {
+            unsigned char c = (unsigned char)sentence[j];
+            if (!isspace(c)) {
+                if (chars[c] == 0) {
+                    chars[c] = 1;
+                }
+                counts[c]++;
+            }
+        }
+    }
+
+    // Вывод символов в порядке первого вхождения
+    for (size_t i = 0; i < array->count; i++) {
+        const char *sentence = array->sentences[i];
+        for (size_t j = 0; sentence[j] != '\0'; j++) {
+            unsigned char c = (unsigned char)sentence[j];
+            if (!isspace(c)) {
+                if (chars[c] == 1) {
+                    printf("'%c': %d\n", c, counts[c]);
+                    chars[c] = 2; // Отмечаем, что символ уже выведен
+                }
+            }
+        }
+    }
+}
+
 int main() {
     setlocale(LC_ALL, "en_US.UTF-8");
     printf("Course work for option 4.19, created by Egor Omelyash.\n");
@@ -247,7 +280,6 @@ int main() {
         fprintf(stderr, "Error: no sentences found\n");
         return 1;
     }
-
     remove_duplicate_sentences(&array);
 
     switch (command) {
@@ -269,7 +301,7 @@ int main() {
             }
             break;
         case 3:
-
+            count_and_print_chars(&array);
             break;
         case 4:
 
